@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MilkSense Inventory System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="logo">MilkSense</h1>
+        <p class="subtitle">Inventory Management System</p>
+      </div>
+      <div class="topbar-right">
+        <button id="themeToggle" class="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
+          <span class="theme-icon">☀️</span>
+        </button>
+        
+        <div class="user-info">
+          <span class="user-name">Administrator</span>
+          <span class="user-role">Milk Bank Manager</span>
+        </div>
+
+        <div class="user-menu">
+          <button class="user-menu-trigger" id="userMenuTrigger" aria-label="User menu">
+            <div class="avatar-small">A</div>
+          </button>
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button class="menu-item" onclick="handleLogout()" id="logoutBtn">
+              <span class="menu-icon">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <aside class="sidebar">
+        <nav class="nav-menu">
+          <div class="nav-item" onclick="switchPage('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Dashboard</span>
+          </div>
+          <div class="nav-item" onclick="switchPage('inventory')">
+            <span class="nav-icon">📦</span>
+            <span class="nav-text">Inventory</span>
+          </div>
+          <div class="nav-item" onclick="switchPage('donors')">
+            <span class="nav-icon">🤝</span>
+            <span class="nav-text">Donors</span>
+          </div>
+          <div class="nav-item" onclick="switchPage('beneficiaries')">
+            <span class="nav-icon">👶</span>
+            <span class="nav-text">Beneficiaries</span>
+          </div>
+          <div class="nav-item" onclick="switchPage('reports')">
+            <span class="nav-icon">📈</span>
+            <span class="nav-text">Reports</span>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <section id="dashboard" class="page active">
+          <div class="page-header">
+            <h2>Dashboard</h2>
+            <p class="subtitle">System Overview & Statistics</p>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon">📦</div>
+              <div class="kpi-content">
+                <div class="kpi-label">Total Milk Stock</div>
+                <div class="kpi-value" id="totalMilk">0</div>
+                <div class="kpi-unit">ml</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">🤝</div>
+              <div class="kpi-content">
+                <div class="kpi-label">Total Donors</div>
+                <div class="kpi-value" id="totalDonors">0</div>
+                <div class="kpi-unit">Active</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">👶</div>
+              <div class="kpi-content">
+                <div class="kpi-label">Total Beneficiaries</div>
+                <div class="kpi-value" id="totalBeneficiaries">0</div>
+                <div class="kpi-unit">Families</div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">📊</div>
+              <div class="kpi-content">
+                <div class="kpi-label">Distributed</div>
+                <div class="kpi-value" id="totalDistributed">0</div>
+                <div class="kpi-unit">ml this month</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Inventory Status</h3>
+            <div class="status-grid">
+              <div class="status-card">
+                <div class="status-label">Fresh Donations</div>
+                <div class="status-value" id="statusFresh">0 ml</div>
+                <div class="status-bar">
+                  <div class="status-fill fresh" id="barFresh"></div>
+                </div>
+              </div>
+              <div class="status-card">
+                <div class="status-label">Pasteurized</div>
+                <div class="status-value" id="statusPasteurized">0 ml</div>
+                <div class="status-bar">
+                  <div class="status-fill pasteurized" id="barPasteurized"></div>
+                </div>
+              </div>
+              <div class="status-card">
+                <div class="status-label">Dispensed</div>
+                <div class="status-value" id="statusDispensed">0 ml</div>
+                <div class="status-bar">
+                  <div class="status-fill dispensed" id="barDispensed"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Recent Activity</h3>
+            <div id="recentActivity" class="activity-list">
+              <p class="empty-state">No activity yet</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="inventory" class="page">
+          <div class="page-header">
+            <h2>Inventory Management</h2>
+            <p class="subtitle">Add, edit, and manage milk inventory</p>
+            <button class="btn btn-primary" onclick="openInventoryForm()">+ Add Milk Record</button>
+          </div>
+
+          <div class="section">
+            <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border);">
+              <h3 class="section-title" style="margin-bottom:0; padding-bottom:0; border:none;">Current Stock</h3>
+              <span class="stock-count" id="stockCountBadge" style="background: var(--bg-tertiary); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">0 items</span>
+            </div>
+            
+            <div id="inventoryList" class="inventory-card-list">
+              <p class="empty-state">No inventory records. Add one to get started!</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="donors" class="page">
+          <div class="page-header">
+            <h2>Donor Management</h2>
+            <p class="subtitle">Register and manage milk donors</p>
+            <button class="btn btn-primary" onclick="openDonorForm()">+ Register Donor</button>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Active Donors</h3>
+            <div id="donorsList" class="card-grid">
+              <p class="empty-state" style="grid-column: 1/-1;">No donors registered yet. Add one to get started!</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="beneficiaries" class="page">
+          <div class="page-header">
+            <h2>Beneficiary Management</h2>
+            <p class="subtitle">Register and manage families receiving milk</p>
+            <button class="btn btn-primary" onclick="openBeneficiaryForm()">+ Register Beneficiary</button>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Active Beneficiaries</h3>
+            <div id="beneficiariesList" class="card-grid">
+              <p class="empty-state" style="grid-column: 1/-1;">No beneficiaries registered yet. Add one to get started!</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="reports" class="page">
+          <div class="page-header">
+            <h2>Reports & Analytics</h2>
+            <p class="subtitle">View system statistics and trends</p>
+          </div>
+
+          <div class="report-buttons">
+            <button class="btn btn-secondary" onclick="generateReport('weekly')">📅 Weekly Report</button>
+            <button class="btn btn-secondary" onclick="generateReport('monthly')">📊 Monthly Report</button>
+            <button class="btn btn-secondary" onclick="generateReport('yearly')">📈 Yearly Report</button>
+          </div>
+
+          <div class="section">
+            <h3 class="section-title">Summary Statistics</h3>
+            <div class="report-grid">
+              <div class="report-card">
+                <div class="report-label">Total Donated</div>
+                <div class="report-value" id="reportDonated">0 ml</div>
+              </div>
+              <div class="report-card">
+                <div class="report-label">Total Distributed</div>
+                <div class="report-value" id="reportDistributed">0 ml</div>
+              </div>
+              <div class="report-card">
+                <div class="report-label">Current Stock</div>
+                <div class="report-value" id="reportStock">0 ml</div>
+              </div>
+              <div class="report-card">
+                <div class="report-label">Active Donors</div>
+                <div class="report-value" id="reportActiveDonors">0</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="inventoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="inventoryModalTitle">Add Milk Record</h3>
+        <button class="modal-close" onclick="closeModal('inventoryModal')">&times;</button>
+      </div>
+      <form id="inventoryForm" onsubmit="saveInventory(event)">
+        <div class="form-group">
+          <label for="invDonorName">Donor Name *</label>
+          <select id="invDonorName" required>
+            <option value="">Select a donor...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="invQuantity">Quantity (ml) *</label>
+          <input type="number" id="invQuantity" placeholder="Enter quantity" min="1" required>
+        </div>
+        <div class="form-group">
+          <label for="invStatus">Status *</label>
+          <select id="invStatus" required>
+            <option value="">Select Status</option>
+            <option value="Fresh">Fresh Donation</option>
+            <option value="Pasteurized">Pasteurized</option>
+            <option value="Dispensed">Dispensed</option>
+          </select>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('inventoryModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="dispenseModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="dispenseModalTitle">Dispense Milk</h3>
+      <form id="dispenseForm" onsubmit="dispenseRecord(event)">
+        <div class="form-group">
+          <label for="dispenseBeneficiary">Select Beneficiary *</label>
+          <select id="dispenseBeneficiary" required>
+            <option value="">Select a beneficiary...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dispenseVolume">Volume to Dispense (ml) *</label>
+          <input type="number" id="dispenseVolume" required>
+        </div>
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn-small" onclick="closeModal('dispenseModal')">Cancel</button>
+          <button type="submit" class="btn-login">Confirm Dispense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="donorModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="donorModalTitle">Register Donor</h3>
+        <button class="modal-close" onclick="closeModal('donorModal')">&times;</button>
+      </div>
+      <form id="donorForm" onsubmit="saveDonor(event)">
+        <div class="form-group">
+          <label for="donorName">Full Name *</label>
+          <input type="text" id="donorName" placeholder="Enter full name" required>
+        </div>
+        <div class="form-group">
+          <label for="donorPhone">Phone Number *</label>
+          <input type="tel" id="donorPhone" placeholder="09XX-XXXX-XXX" required>
+        </div>
+        <div class="form-group">
+          <label for="donorBloodType">Blood Type</label>
+          <select id="donorBloodType">
+            <option value="">Select Blood Type</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="donorEmail">Email</label>
+          <input type="email" id="donorEmail" placeholder="your@email.com">
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('donorModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Donor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="beneficiaryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="beneficiaryModalTitle">Register Beneficiary</h3>
+        <button class="modal-close" onclick="closeModal('beneficiaryModal')">&times;</button>
+      </div>
+      <form id="beneficiaryForm" onsubmit="saveBeneficiary(event)">
+        <div class="form-group">
+          <label for="childName">Child's Name *</label>
+          <input type="text" id="childName" placeholder="Child's full name" required>
+        </div>
+        <div class="form-group">
+          <label for="motherName">Mother's Name *</label>
+          <input type="text" id="motherName" placeholder="Mother's full name" required>
+        </div>
+        <div class="form-group">
+          <label for="contactPhone">Contact Phone *</label>
+          <input type="tel" id="contactPhone" placeholder="09XX-XXXX-XXX" required>
+        </div>
+        <div class="form-group">
+          <label for="childAge">Age (months) *</label>
+          <input type="number" id="childAge" placeholder="Age in months" min="0" max="60" required>
+        </div>
+        <div class="form-group">
+          <label for="medicalNotes">Medical Notes</label>
+          <textarea id="medicalNotes" placeholder="Any special medical conditions or notes"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('beneficiaryModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Beneficiary</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="alertModal" class="modal">
+    <div class="modal-content alert-modal">
+      <p id="alertMessage">Alert message</p>
+      <button class="btn btn-primary" onclick="closeModal('alertModal')">OK</button>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
